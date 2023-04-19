@@ -2,6 +2,13 @@
 
 Zombie::Zombie(int x, int y, int health, int speed): Character(x,y,health),_speed{speed}{}
 
+void Zombie::init(int x,int y, int health, int speed){
+    _x=x;
+    _y=y;
+    _health = health;
+    _speed= speed;
+};
+
 void Zombie::draw(N5110 &lcd) {
     lcd.drawSprite(_x,_y,9,6,(int*) _zombie);
 }

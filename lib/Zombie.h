@@ -12,6 +12,7 @@ class Zombie : public Character{
     public: 
     Zombie(int x, int y, int health, int speed);
     void draw(N5110 &lcd);
+    void init(int x, int y, int health,int speed);
     void set_position_x(int x);
     void set_position_y(int y);
     int get_speed();
