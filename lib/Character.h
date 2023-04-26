@@ -15,6 +15,7 @@ public:
     int get_x();
     int get_y();
     int get_health();
+    void set_health(int x);
     int _health;
     int _x;
     int _y;

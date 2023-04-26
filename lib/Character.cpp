@@ -17,3 +17,7 @@ void Character::init(int x,int y, int health){
 int Character::get_health(){return {_health};}
 int Character::get_x(){return {_x};};
 int Character::get_y(){return {_y};};
+
+void Character::set_health(int x){
+    _health =x;
+}

@@ -16,7 +16,6 @@ class Player : public Character{
     void set_position_x(int x);
     void set_position_y(int y);
     int get_position_y();
-    
     int get_position_x();
 
     const int _player[9][6]= {

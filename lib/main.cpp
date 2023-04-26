@@ -28,21 +28,21 @@ using namespace std;
 
 N5110 lcd(PC_7, PA_9, PB_10, PB_5, PB_3, PA_10);
 Joystick joystick(PC_1, PC_0);
-DigitalIn buttonA(BUTTON1); //onboard user button
 
 
 
 void init();
 void welcome();
-void game_over();
+void Game_Over();
+DigitalIn buttonA(BUTTON1); //onboard user button
 void check_boundary();
 void create_zombies(int x , int y);
 void Player_movement();
 void shooting();
 
 //global vars
-int r = 10;
-int r_started=0;
+int r = 1;
+int r_started=1;
 volatile int c = 0;
 volatile int shoot = 1;
 int y_pos = 24;
@@ -55,11 +55,11 @@ GameEngine game;
 int main()
 {      
     init();
-   
     welcome();   
-    game.init();      // initialise devices and objects
-    // waiting for the user to start 
-    // render();
+    game.init();      
+    printf("\n");
+    printf("%d",game.player_health());
+    printf("\n");
     int fps = 10;
     thread_sleep_for(1000/fps);  // and wait for one frame period - millseconds
     
@@ -67,11 +67,13 @@ int main()
     while(1){
         UserInput input = {joystick.get_direction(),joystick.get_mag()};
         lcd.clear();
-        if(buttonA.read() == 0){
-            shoot = 1;
-            printf("Test\n");
-        }
-
+        game.zombie_damage();
+        if(r_started==1){
+            game.rounds(r,lcd);
+            if(c%1000==1){
+            r_started =0;
+        }}
+       
         // Creating of boundaries
         lcd.drawLine(0,0,100,0,1);  //top
         lcd.drawLine(0,47,100,47,1);   // bottom
@@ -79,12 +81,10 @@ int main()
         lcd.drawLine(0,0,0,47,1); 
         lcd.drawLine(83,0,83,53,1);
 
-        if(shoot == 1){
-            // shooting();
-               printf("Test2\n");
-        }                
         game.update(input,c);
         game.update_zombie(c);
+        game.zombie_damage();
+        Game_Over();
         game.draw(lcd);
         lcd.refresh();
         lcd.clear();
@@ -105,7 +105,7 @@ void init() {
 void welcome() { // splash screen
     lcd.drawLine(0,2,100,2,1);
     lcd.drawLine(0,45,100,45,1);
-    printf("WORKING WORKING");
+   
 
     const int gun[5][11] ={{1,0,0,0,0,0,0,0,1,0,0},
                           {1,1,1,1,1,1,1,1,1,1,1},
@@ -120,12 +120,19 @@ void welcome() { // splash screen
                              {1,1,0,0},
                              {1,0,0,1},
                              {0,1,1,1},};
+        const int skull [6][5]= {{0,1,1,1,0},
+                                 {1,0,1,0,1},
+                                 {1,0,1,0,1},
+                                 {1,1,1,1,1},
+                                 {0,1,1,1,0},
+                                 {0,1,1,1,0},};
 
-    lcd.printString("ZombieSurvival",0,1);  
-    lcd.printString( "Press BButton",0,2);
+    lcd.printString("Zombie",0,1);  
+    lcd.printString( "Survival",0,2);
     lcd.drawSprite(20,30,5,11,(int*) gun);
     lcd.drawSprite(42,30,3,4,(int*) bullet);
     lcd.drawSprite(35,30,5,4,(int*) flare);
+    lcd.drawSprite(48,30,6,5,(int*) skull);
     lcd.refresh();
 
     ThisThread::sleep_for(5000ms);
@@ -137,21 +144,41 @@ void welcome() { // splash screen
         // }
 }
 
-void game_over() { // splash screen 
-    while (1) {
-        lcd.clear();
-        lcd.printString("  Game Over ",0,2);  
-        lcd.refresh();
-        ThisThread::sleep_for(250ms);
-        lcd.clear();
-        lcd.refresh();
-        ThisThread::sleep_for(250ms);
+void Game_Over(){    
+
+    int h = game.player_health();
+    std::string health = to_string(h);
+    
+    char buffer[14];
+
+    sprintf(buffer,"Health = %1d ",h);
+    lcd.printString(buffer,0,1);
+
+    if  (h <1){
+            while (1) {
+            lcd.clear();
+            lcd.drawLine(0,0,100,0,1);  //top
+            lcd.drawLine(0,47,100,47,1);   // bottom
+            lcd.drawLine(0,0,0,47,1); 
+            lcd.drawLine(83,0,83,53,1);
+            lcd.printString("Game Over ",0,2);  
+            lcd.printString("Press Button A ",0,3);
+            if( buttonA.read()== 0){
+                main();
+            }
+            lcd.refresh();
+            
+           
+        }
     }
-}
+    else {
+       lcd.printString(buffer,0,1);
+    }}
+
 
 
 void shooting(){
-       printf("Test5\n");
+       printf("\n");
     int x= x_pos;
     
     int y= y_pos;
@@ -159,13 +186,7 @@ void shooting(){
 
     if(c%10 ==1){
     x = x+2;
-    printf("Test3\n");
-    }
-
-    if(x == 82){
-        shoot =0;
-   printf("Test4\n");
-    }
+     }
 
 
     bullet.set_position_x(x);
