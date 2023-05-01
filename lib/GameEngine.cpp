@@ -10,6 +10,16 @@ void GameEngine::init(){
     _player.init(24,24,5);
     _player.set_health(5);
     // {76,-8},{-5,21},{-5,44},{8,44},{30,44},{70,44},{85,15},{85,40},{85,30}}; 
+    _zombie1.set_health(1);
+     _zombie2.set_health(1);
+     _zombie3.set_health(1);
+     _zombie4.set_health(1);
+     _zombie5.set_health(1);
+     _zombie6.set_health(1);
+     _zombie7.set_health(1);
+     _zombie8.set_health(1);
+     _zombie9.set_health(1);
+
 
     _Coords[0][0]=-5 ;
     _Coords[0][1]= -8;
@@ -30,7 +40,7 @@ void GameEngine::init(){
     _Coords[5][1]= 44;
 
     _Coords[6][0]=85 ;
-    _Coords[6][1]= 15;
+    _Coords[6][1]= 10;
 
     _Coords[7][0]=85 ;
     _Coords[7][1]= 40;
@@ -55,7 +65,7 @@ int GameEngine::player_y(){
 
 
 void GameEngine::update(UserInput input,int c){
-    zombie_damage();
+    // zombie_damage();
      int x_pos= _player.get_position_x();
      int y_pos=_player.get_position_y();
     if(c%2 ==1){
@@ -109,14 +119,27 @@ void GameEngine::update(UserInput input,int c){
 
 
  void GameEngine::draw(N5110 &lcd) {
+     zombie_damage();
      _player.draw(lcd);
-     _zombie1.draw(lcd);
-    _zombie3.draw(lcd);
-     _zombie4.draw(lcd);
-    _zombie6.draw(lcd);
-     _zombie7.draw(lcd);
-    _zombie8.draw(lcd);
-     _zombie9.draw(lcd);;
+
+    if(_zombie1.get_health() >0){
+     _zombie1.draw(lcd);};
+    if(_zombie2.get_health() >0){
+    _zombie2.draw(lcd);};
+    if(_zombie3.get_health() >0){
+     _zombie3.draw(lcd);};
+     if(_zombie4.get_health() >0){
+    _zombie4.draw(lcd);};
+    if(_zombie5.get_health() >0){
+     _zombie5.draw(lcd);};
+   if(_zombie6.get_health()>0 ){
+    _zombie6.draw(lcd);};
+    if(_zombie7.get_health() >0){
+     _zombie7.draw(lcd);};
+    if(_zombie8.get_health() >0){
+     _zombie8.draw(lcd);};
+     if(_zombie9.get_health() >0){
+     _zombie9.draw(lcd);};
     
     };
 
@@ -216,6 +239,8 @@ void GameEngine::rounds(int r,N5110 &lcd){
 void GameEngine::zombie_damage(){
     int px =_player.get_position_x();
     int py=_player.get_position_y();
+    int z;
+
 
 
     // for (int i=0;i<9; i++){
@@ -225,20 +250,52 @@ void GameEngine::zombie_damage(){
     //     int ph = _player.get_health();
     //     ph = ph-1;
     //     _player.set_health(ph);
-    // }
+    // }#
     
-   for (int i=0;i<5; i++){
+   for (int i=0;i<9; i++){
     if( px == _Coords[i][0] && py == _Coords[i][1]){
+        
+        switch(i){
+            case(0):
+              z =_zombie1.get_health();
+            break;
+            case(1):
+              z =_zombie2.get_health();
+            break;
+            case(2):
+              z =_zombie3.get_health();
+            break;
+            case(3):
+              z =_zombie4.get_health();
+            break;
+            case(4):
+              z =_zombie5.get_health();
+            break;
+            case(5):
+              z =_zombie6.get_health();
+            break;
+            case(6):
+              z =_zombie7.get_health();
+            break;
+            case(7):
+              z =_zombie8.get_health();
+            break;
+            case(8):
+              z =_zombie9.get_health();
+            break;
+
+        }
+    if(z>0){
         int ph = _player.get_health();
         ph = ph-1;
         _player.set_health(ph);
+    };
     }
-        if( px == _Coords[8-i][0] && py == _Coords[8-i][1]){
-        int ph = _player.get_health();
-        ph = ph-1;
-        _player.set_health(ph);
-    }
+
 }
+
+
+
 }
 
 int GameEngine::player_health(){
@@ -246,3 +303,98 @@ int GameEngine::player_health(){
     return{h};
 
 }
+
+void GameEngine::check_bullet_collision(int x,int y){
+    int zomb;
+    int h;
+    int xp = _player.get_position_x();
+    int yp = _player.get_position_y();
+
+       for (int i=0;i<9; i++){
+       if(xp !=_Coords[i][0]  && yp != _Coords[i][1]){
+         if( x == _Coords[i][0] && y == _Coords[i][1] ){
+            zomb = i;
+        }
+        }
+
+
+    switch(zomb){
+        case(0):
+        h = _zombie1.get_health();
+           h = h-1;
+           _zombie1.set_health(h);
+
+        break;
+        case(1):
+           h = _zombie2.get_health();
+           h = h-1;
+           _zombie2.set_health(h);
+        break;
+        case(2):
+           h = _zombie3.get_health();
+           h = h-1;
+           _zombie3.set_health(h);
+        break;
+        case(3):
+           h = _zombie4.get_health();
+           h = h-1;
+           _zombie4.set_health(h);
+        break;
+        case(4):
+          h = _zombie5.get_health();
+           h = h-1;
+           _zombie5.set_health(h);
+        break;
+
+        case(5):
+           h = _zombie6.get_health();
+           h = h-1;
+           _zombie6.set_health(h);
+        break;
+        case(6):
+           h = _zombie7.get_health();
+           h = h-1;
+           _zombie7.set_health(h);
+        break;
+        case(7):
+           h = _zombie8.get_health();
+           h = h-1;
+           _zombie8.set_health(h);
+        break;
+
+        case(8):
+           h = _zombie9.get_health();
+           h = h-1;
+           _zombie9.set_health(h);
+        break;
+
+
+    }
+}
+
+};
+
+int GameEngine::check_zombie_health()
+{
+    int total_h;
+    int game_won;
+
+    total_h = _zombie1.get_health();
+    total_h=_zombie2.get_health()+ total_h;
+    total_h=_zombie3.get_health()+ total_h;
+    total_h=_zombie4.get_health()+ total_h;
+    total_h=_zombie5.get_health()+ total_h;
+    total_h=_zombie6.get_health()+ total_h;
+    total_h=_zombie7.get_health()+ total_h;
+    total_h=_zombie8.get_health()+ total_h;
+    total_h=_zombie9.get_health()+ total_h;
+
+    if(total_h==0){
+        game_won=1;
+        
+    }else{
+        game_won=0;
+    }
+    return{game_won};
+
+};

@@ -6,30 +6,16 @@
 #include "Utils.h"
 #include "GameEngine.h"
 #include "Bullet.h"
+#include <cstdint>
 #include <vector>
 #include <string>  // for string
 using namespace std;
 
-// MAKE SET NO OF ZOMBIES
-// USE IF STATMENTS TO SELECT IF NEEDED ZOMBIE1/ZOMBIE2
-//DRAW THEM 
-// INIT
-// ZOMBIE COLLISIONS AND PLAYER COLLISION
-////TO DO:
-// FIX CLASSES
-// CREATE PATHFINDING
-//CREATE BORDER
-//SHOOTING
-//OPTIONS
-//HEALTH
-//ROUNDS
-//
-
-
 N5110 lcd(PC_7, PA_9, PB_10, PB_5, PB_3, PA_10);
 Joystick joystick(PC_1, PC_0);
-
-
+DigitalIn button1(PC_11);
+DigitalIn button2(PC_10);
+DigitalIn button3(PD_2); 
 
 void init();
 void welcome();
@@ -38,16 +24,22 @@ DigitalIn buttonA(BUTTON1); //onboard user button
 void check_boundary();
 void create_zombies(int x , int y);
 void Player_movement();
-void shooting();
-
+void shooting(UserInput input, int c);
+void fired(UserInput input);
+void shooting_check();
+void reset_bullet();
+int Direction_toogle(UserInput input);
 //global vars
 int r = 1;
 int r_started=1;
 volatile int c = 0;
-volatile int shoot = 1;
 int y_pos = 24;
 int x_pos = 42;
+int xs =24;
+int ys = 42;
+int shoot =0;
 GameEngine game;
+Bullet bullet;
 
 
 
@@ -57,9 +49,6 @@ int main()
     init();
     welcome();   
     game.init();      
-    printf("\n");
-    printf("%d",game.player_health());
-    printf("\n");
     int fps = 10;
     thread_sleep_for(1000/fps);  // and wait for one frame period - millseconds
     
@@ -80,10 +69,29 @@ int main()
 
         lcd.drawLine(0,0,0,47,1); 
         lcd.drawLine(83,0,83,53,1);
+        if(button1.read()==  1){
+            shoot =2;
+        }
+        if(button2.read()== 1){
+            shoot =1;
+        }
+        
+        if(button3.read()== 1){
+            shoot =3;
+        }
+        if(shoot ==0){
+            reset_bullet();
+        }
 
         game.update(input,c);
         game.update_zombie(c);
+        
+        fired(input);
+        game.check_bullet_collision(xs,ys);
+        shooting_check();
+        game.check_zombie_health();
         game.zombie_damage();
+
         Game_Over();
         game.draw(lcd);
         lcd.refresh();
@@ -151,7 +159,7 @@ void Game_Over(){
     
     char buffer[14];
 
-    sprintf(buffer,"Health = %1d ",h);
+    // sprintf(buffer,"Health = %1d ",h);
     lcd.printString(buffer,0,1);
 
     if  (h <1){
@@ -173,25 +181,53 @@ void Game_Over(){
     }
     else {
        lcd.printString(buffer,0,1);
-    }}
+    }
+}
+void fired(UserInput input){
 
 
+    if(shoot==1){
+        xs=xs+1;
+    };
+    if(shoot==2){
+        xs=xs-1;
+    };
+    if(shoot==3){
+        ys=ys-1;
+    };  
 
-void shooting(){
-       printf("\n");
-    int x= x_pos;
+        bullet.set_position_x(xs);
+        bullet.set_position_y(ys);
+        bullet.draw(lcd,shoot);
     
-    int y= y_pos;
-    Bullet bullet(x,y);
+}
 
-    if(c%10 ==1){
-    x = x+2;
+ void shooting_check(){
+
+     if(bullet.get_x() <= 0  || bullet.get_x()>=78  ){
+
+            //  bullet.set_position_x(-5);
+            // bullet.set_position_y(-5);
+            reset_bullet();
+            shoot=0;
+
      }
 
+     if(bullet.get_y() <= 0  || bullet.get_y()>=42  ){
 
-    bullet.set_position_x(x);
-    bullet.set_position_y(y);
-    bullet.draw(lcd);
+            //  bullet.set_position_x(-5);
+            // bullet.set_position_y(-5);
+            reset_bullet();
+            shoot=0;
 
+     }
 
-};
+ }
+
+ void reset_bullet(){
+    xs= game.player_x();
+    
+    ys =game.player_y();
+
+ };
+

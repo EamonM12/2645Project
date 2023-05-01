@@ -21,7 +21,8 @@ class GameEngine {
         void check_boundary_collision();
         int player_health();
         Player _player;
-     
+        void check_bullet_collision(int x,int y);
+        int check_zombie_health();     
         int _lives;
         void zombie_damage();
         Zombie _zombie1;
