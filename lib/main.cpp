@@ -10,8 +10,8 @@
 #include <vector>
 #include <string>  // for string
 using namespace std;
-
 N5110 lcd(PC_7, PA_9, PB_10, PB_5, PB_3, PA_10);
+BusOut SegDis(PA_11,PA_12, PB_1,PB_15,PB_14,PB_12,PB_11); 
 Joystick joystick(PC_1, PC_0);
 DigitalIn button1(PC_11);
 DigitalIn button2(PC_10);
@@ -29,8 +29,9 @@ void fired(UserInput input);
 void shooting_check();
 void reset_bullet();
 int Direction_toogle(UserInput input);
+void Game_won();
 //global vars
-int r = 1;
+int r;
 int r_started=1;
 volatile int c = 0;
 int y_pos = 24;
@@ -40,6 +41,8 @@ int ys = 42;
 int shoot =0;
 GameEngine game;
 Bullet bullet;
+//               0     1     2     3     4     5     6     7     8     9     A     B     C     D     E     F    
+int hexDis[] = {0x3F, 0x06, 0x5B,0x4F,0x66,0x6D,0x7D,0X07,0x7F,0x67,0x00};
 
 
 
@@ -57,23 +60,20 @@ int main()
         UserInput input = {joystick.get_direction(),joystick.get_mag()};
         lcd.clear();
         game.zombie_damage();
-        if(r_started==1){
-            game.rounds(r,lcd);
-            if(c%1000==1){
-            r_started =0;
-        }}
-       
+        SegDis.write(hexDis[r]);
         // Creating of boundaries
         lcd.drawLine(0,0,100,0,1);  //top
         lcd.drawLine(0,47,100,47,1);   // bottom
 
         lcd.drawLine(0,0,0,47,1); 
         lcd.drawLine(83,0,83,53,1);
+
         if(button1.read()==  1){
             shoot =2;
         }
         if(button2.read()== 1){
-            shoot =1;
+            // shoot =1;
+            game.insta_kill();
         }
         
         if(button3.read()== 1){
@@ -82,16 +82,23 @@ int main()
         if(shoot ==0){
             reset_bullet();
         }
+                 
 
         game.update(input,c);
-        game.update_zombie(c);
-        
+        game.update_zombie(c);        
         fired(input);
         game.check_bullet_collision(xs,ys);
         shooting_check();
-        game.check_zombie_health();
         game.zombie_damage();
 
+        int ended = game.check_zombie_health();
+        if(ended == 9 && c%30==1){
+            r=r+1;
+            game.new_round(r);
+            ended =0;
+        }
+
+        Game_won();
         Game_Over();
         game.draw(lcd);
         lcd.refresh();
@@ -108,6 +115,7 @@ void init() {
     lcd.init(LPH7366_1);
     lcd.setContrast(0.5);
     joystick.init();
+    r=1;
 };
 
 void welcome() { // splash screen
@@ -193,7 +201,7 @@ void fired(UserInput input){
         xs=xs-1;
     };
     if(shoot==3){
-        ys=ys-1;
+        ys=ys+1;
     };  
 
         bullet.set_position_x(xs);
@@ -230,4 +238,26 @@ void fired(UserInput input){
     ys =game.player_y();
 
  };
+
+void Game_won(){
+
+    if  (r >9){
+            while (1) {
+            lcd.clear();
+            lcd.drawLine(0,0,100,0,1);  //top
+            lcd.drawLine(0,47,100,47,1);   // bottom
+            lcd.drawLine(0,0,0,47,1); 
+            lcd.drawLine(83,0,83,53,1);
+            lcd.printString("You Won! ",0,2);  
+            lcd.printString("Press Button A ",0,3);
+            if( buttonA.read()== 0){
+                main();
+            }
+            lcd.refresh();
+            
+           
+        }
+    }
+
+}
 

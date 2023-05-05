@@ -16,7 +16,9 @@ class GameEngine {
         int player_y();
         int player_x();
         void update_zombie(int c);
-        void rounds(int r,N5110 &lcd);
+        int Check_round_ended(int r);
+        void new_round(int r);
+        void insta_kill();
         vector<vector<int>> _Coords{{-5,-8},{76,-8},{-5,21},{-5,44},{8,44},{30,44},{70,44},{85,15},{85,40},{85,30}}; 
         void check_boundary_collision();
         int player_health();
@@ -25,6 +27,8 @@ class GameEngine {
         int check_zombie_health();     
         int _lives;
         void zombie_damage();
+        int game_won;
+
         Zombie _zombie1;
         Zombie _zombie2;
         Zombie _zombie3;

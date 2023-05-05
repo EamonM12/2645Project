@@ -2,15 +2,17 @@
 #include <string>
 #include <cstdlib> 
 #include <stdio.h>
+#include <vector>
 
 
-GameEngine::GameEngine(): _player(24,41,2),_zombie1(_Coords[0][0],_Coords[0][1] ,1,2),_zombie2(_Coords[1][0],_Coords[1][1],1,2),_zombie3(_Coords[2][0],_Coords[2][1],1,2),_zombie4(_Coords[3][0],_Coords[3][1],1,2),_zombie5(_Coords[4][0],_Coords[4][1],1,2),_zombie6(_Coords[5][0],_Coords[5][1],1,2),_zombie7(_Coords[6][0],_Coords[6][1],1,2),_zombie8(_Coords[7][0],_Coords[7][1],1,2),_zombie9(_Coords[8][0],_Coords[8][1],1,2){};
+GameEngine::GameEngine(): _player(24,41,2),_zombie1(_Coords[0][0],_Coords[0][1],1,2),_zombie2(_Coords[1][0],_Coords[1][1],1,2),_zombie3(_Coords[2][0],_Coords[2][1],1,2),_zombie4(_Coords[3][0],_Coords[3][1],1,2),_zombie5(_Coords[4][0],_Coords[4][1],1,2),_zombie6(_Coords[5][0],_Coords[5][1],1,2),_zombie7(_Coords[6][0],_Coords[6][1],1,2),_zombie8(_Coords[7][0],_Coords[7][1],1,2),_zombie9(_Coords[8][0],_Coords[8][1],1,2){};
 
 void GameEngine::init(){
     _player.init(24,24,5);
     _player.set_health(5);
+     game_won = 0;
     // {76,-8},{-5,21},{-5,44},{8,44},{30,44},{70,44},{85,15},{85,40},{85,30}}; 
-    _zombie1.set_health(1);
+     _zombie1.set_health(1);
      _zombie2.set_health(1);
      _zombie3.set_health(1);
      _zombie4.set_health(1);
@@ -223,19 +225,6 @@ void GameEngine::update_zombie(int c){
 
 }
 
-void GameEngine::rounds(int r,N5110 &lcd){
-
-    std::string round = to_string(r);
-
-    char buffer[14];
-
-    sprintf(buffer,"Round %1d ",r);
-    lcd.printString(buffer,0,1);
-    lcd.printString("Round",0,1);
-
-    
-}
-
 void GameEngine::zombie_damage(){
     int px =_player.get_position_x();
     int py=_player.get_position_y();
@@ -376,25 +365,103 @@ void GameEngine::check_bullet_collision(int x,int y){
 
 int GameEngine::check_zombie_health()
 {
-    int total_h;
-    int game_won;
+    vector<int> total_h={0,0,0,0,0,0,0,0,0};
 
-    total_h = _zombie1.get_health();
-    total_h=_zombie2.get_health()+ total_h;
-    total_h=_zombie3.get_health()+ total_h;
-    total_h=_zombie4.get_health()+ total_h;
-    total_h=_zombie5.get_health()+ total_h;
-    total_h=_zombie6.get_health()+ total_h;
-    total_h=_zombie7.get_health()+ total_h;
-    total_h=_zombie8.get_health()+ total_h;
-    total_h=_zombie9.get_health()+ total_h;
+    total_h[0] = _zombie1.get_health();
+    total_h[1]=_zombie2.get_health();
+    total_h[2]=_zombie3.get_health();
+    total_h[3]=_zombie4.get_health();
+    total_h[4]=_zombie5.get_health();
+    total_h[5]=_zombie6.get_health();
+    total_h[6]=_zombie7.get_health();
+    total_h[7]=_zombie8.get_health();
+    total_h[8]=_zombie9.get_health();
+    // printf("Zombie9:%d",total_h[8]);
+    // printf("\nZOMBIEHealht,%d",total_h[1]);
+    // printf("\nZOMBIEHealht,%d",total_h[2]);
+    // printf("\nZOMBIEHealht,%d",total_h[3]);
+    // printf("\nZOMBIEHealht,%d",total_h[4]);
 
-    if(total_h==0){
-        game_won=1;
-        
-    }else{
-        game_won=0;
+    for(int i=0;i<9;i++){
+
+        if(total_h[i]<1 && game_won<10){
+            game_won=game_won+1;
+        }
+        else{game_won=0;}
     }
+    // printf("\nZombies_Dead:%d",game_won);
+
+  
     return{game_won};
+
+};
+
+
+void GameEngine::new_round(int r){
+    game_won =0;
+    _zombie1.set_health(r);
+    _zombie2.set_health(r);
+    _zombie3.set_health(r);
+    _zombie4.set_health(r);
+    _zombie5.set_health(r);
+    _zombie6.set_health(r);
+    _zombie7.set_health(r);
+    _zombie8.set_health(r);
+    _zombie9.set_health(r);
+
+    _Coords[0][0]=-5 ;
+    _Coords[0][1]= -8;
+
+    _Coords[1][0]= -5 ;
+    _Coords[1][1]= 21;
+
+    _Coords[2][0]=-5 ;
+    _Coords[2][1]= 44;
+
+    _Coords[3][0]=8 ;
+    _Coords[3][1]= 44;
+
+    _Coords[4][0]=30;
+    _Coords[4][1]= 44;
+
+    _Coords[5][0]=70;
+    _Coords[5][1]= 44;
+
+    _Coords[6][0]=85 ;
+    _Coords[6][1]= 10;
+
+    _Coords[7][0]=85 ;
+    _Coords[7][1]= 40;
+
+    _Coords[8][0]=85 ;
+    _Coords[8][1]= 30;
+
+
+    
+};
+
+int GameEngine::Check_round_ended(int r){
+
+    int yes = check_zombie_health();
+
+    if(yes == 1){
+        r=r+1;
+    }
+    return {r};
+
+};
+
+
+
+void GameEngine::insta_kill(){
+     _zombie1.set_health(0);
+     _zombie2.set_health(0);
+     _zombie3.set_health(0);
+     _zombie4.set_health(0);
+     _zombie5.set_health(0);
+     _zombie6.set_health(0);
+     _zombie7.set_health(0);
+     _zombie8.set_health(0);
+     _zombie9.set_health(0);
 
 };
