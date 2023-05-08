@@ -68,15 +68,15 @@ int main()
         lcd.drawLine(0,0,0,47,1); 
         lcd.drawLine(83,0,83,53,1);
 
-        if(button1.read()==  1){
+        if(button1.read()==  1&& shoot ==0){
             shoot =2;
         }
-        if(button2.read()== 1){
-            // shoot =1;
-            game.insta_kill();
+        if(button2.read()== 1 && shoot ==0){
+            shoot =1;
+            //game.insta_kill();
         }
         
-        if(button3.read()== 1){
+        if(button3.read()== 1 && shoot ==0){
             shoot =3;
         }
         if(shoot ==0){
